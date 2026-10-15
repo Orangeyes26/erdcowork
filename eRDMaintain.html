@@ -1,0 +1,768 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>eRD 維護中</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --brand:#2AA3AB;
+  --time:#17858D; /* 回線時間數字：淺色卡片用主色 #2AA3AB 加深一階（同色相，確保在淺底上可讀），深色卡片用暖黃 */
+  --bg:#F2F5F5; --surface:#FFFFFF; --border:#D3DCDD; --divider:#E3E9EA;
+  --ink:#13201F; --ink-2:#3A4847; --ink-3:#566362;
+  --accent:#2AA3AB; --accent-soft:rgba(42,163,171,.16); --accent-on-soft:#0E4F54; --accent-ink:#146B71;
+  --hero-bg:#F7FBFB; --hero-border:#0F2229; --hero-ink:#13201F; --hero-ink-2:#3A4847; --hero-accent:#1E8A92;
+  --blob-a:rgba(42,163,171,.34); --blob-b:rgba(76,110,245,.26); --blob-c:rgba(151,86,214,.24); --blob-d:rgba(42,163,171,.18);
+  --hero-edge:rgba(19,32,31,.08); --hero-shadow:0 18px 40px -22px rgba(42,163,171,.45); --time-glow:0 1px 0 rgba(255,255,255,.7),0 0 22px rgba(255,255,255,.85);
+  --time-ink:#0F1A19; --hero-sub:#4B5958; --g1:#17858D; --g2:#3730A3;
+  --logo-bg:#13201F; --logo-ink:#F2F5F5;
+  --bar-done:#13201F; --bar-idle:#DCE4E5;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0B1416; --surface:#121E21; --border:#22343A; --divider:#1C2C30;
+    --ink:#E6EEEE; --ink-2:#B4C3C4; --ink-3:#8DA0A1;
+    --accent-soft:rgba(42,163,171,.20); --accent-on-soft:#8FE0E5; --accent-ink:#5CCBD2;
+    --hero-bg:#0C1C24; --hero-border:#1E4C51; --hero-ink:#F4FAFA; --hero-ink-2:#BCD5D7; --hero-accent:#5CCBD2;
+  --blob-a:rgba(42,163,171,.62); --blob-b:rgba(76,110,245,.48); --blob-c:rgba(151,86,214,.46); --blob-d:rgba(42,163,171,.30);
+  --hero-edge:rgba(255,255,255,.14); --hero-shadow:0 18px 40px -18px rgba(42,163,171,.55); --time:#FFC857; --time-glow:0 0 28px rgba(255,200,87,.28); --time-ink:#FFFFFF; --hero-sub:#B3C6C8; --g1:#5CCBD2; --g2:#A5B4FC;
+    --logo-bg:#2AA3AB; --logo-ink:#0B1416;
+    --bar-done:#8DA0A1; --bar-idle:#22343A;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0B1416; --surface:#121E21; --border:#22343A; --divider:#1C2C30;
+  --ink:#E6EEEE; --ink-2:#B4C3C4; --ink-3:#8DA0A1;
+  --accent-soft:rgba(42,163,171,.20); --accent-on-soft:#8FE0E5; --accent-ink:#5CCBD2;
+  --hero-bg:#0C1C24; --hero-border:#1E4C51; --hero-ink:#F4FAFA; --hero-ink-2:#BCD5D7; --hero-accent:#5CCBD2;
+  --blob-a:rgba(42,163,171,.62); --blob-b:rgba(76,110,245,.48); --blob-c:rgba(151,86,214,.46); --blob-d:rgba(42,163,171,.30);
+  --hero-edge:rgba(255,255,255,.14); --hero-shadow:0 18px 40px -18px rgba(42,163,171,.55); --time:#FFC857; --time-glow:0 0 28px rgba(255,200,87,.28); --time-ink:#FFFFFF; --hero-sub:#B3C6C8; --g1:#5CCBD2; --g2:#A5B4FC;
+  --logo-bg:#2AA3AB; --logo-ink:#0B1416;
+  --bar-done:#8DA0A1; --bar-idle:#22343A;
+}
+
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  min-height:100vh; display:flex; flex-direction:column;
+  background:var(--bg); color:var(--ink);
+  font-family:'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif;
+  transition:background .3s,color .3s;
+}
+.mono{font-family:'IBM Plex Mono',ui-monospace,monospace}
+
+header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding:20px 32px;border-bottom:1px solid var(--border)}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:32px;height:32px;border-radius:8px;background:var(--logo-bg);color:var(--logo-ink);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px}
+.brand b{font-size:17px;letter-spacing:.01em}
+.brand span{font-size:14px;color:var(--ink-2)}
+.head-right{display:flex;align-items:center;gap:16px}
+.status-code{font-size:13px;color:var(--ink-2)}
+.theme-btn{
+  display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border-radius:10px;
+  border:1px solid var(--border);background:var(--surface);color:var(--ink);font:inherit;font-size:14px;cursor:pointer
+}
+.theme-btn:hover{border-color:var(--accent)}
+.theme-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+main{flex:1;display:flex;justify-content:center;padding:56px 24px 48px}
+.wrap{width:100%;max-width:960px;display:flex;flex-direction:column;gap:32px}
+
+.intro-top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.intro-top .pill{align-self:center}
+.intro-actions{display:flex;gap:8px;margin-left:auto}
+.lang-btn{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--ink-2);font:inherit;font-size:14px;font-weight:500;cursor:pointer}
+.lang-btn:hover{color:var(--ink);border-color:var(--accent)}
+.lang-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.pill{align-self:flex-start;display:flex;align-items:center;gap:10px;padding:6px 14px 6px 10px;border-radius:999px;background:var(--accent-soft);color:var(--accent-on-soft);font-size:14px;font-weight:500}
+.dot{position:relative;width:10px;height:10px;display:inline-block}
+.dot i{position:absolute;inset:0;border-radius:999px;background:var(--accent)}
+.dot i.ripple{animation:ripple 1.8s ease-out infinite}
+.intro{display:flex;flex-direction:column;gap:16px}
+h1{margin:0;font-size:clamp(40px,6vw,56px);line-height:1.15;font-weight:900;letter-spacing:.02em}
+h1 .ellipsis span{display:inline-block;animation:ellipsis 1.4s ease-in-out infinite}
+h1 .ellipsis span:nth-child(2){animation-delay:.2s}
+h1 .ellipsis span:nth-child(3){animation-delay:.4s}
+.lead{margin:0;font-size:18px;line-height:1.7;color:var(--ink-2);max-width:640px}
+
+.row{display:flex;flex-wrap:wrap;gap:16px}
+.hero{flex:2 1 420px;min-width:0;position:relative;overflow:hidden;isolation:isolate;background:var(--hero-bg);color:var(--hero-ink);border:1px solid var(--hero-edge);border-radius:20px;padding:28px 32px;display:flex;flex-direction:column;gap:14px;box-shadow:var(--hero-shadow),inset 0 1px 0 rgba(255,255,255,.12)}
+/* 半透明彩色漸層：青 → 靛 → 紫，緩慢漂移 */
+.hero::before{
+  content:"";position:absolute;inset:-35%;z-index:-1;
+  background:
+    radial-gradient(40% 50% at 22% 28%, var(--blob-a), transparent 70%),
+    radial-gradient(38% 46% at 78% 30%, var(--blob-b), transparent 70%),
+    radial-gradient(45% 55% at 62% 78%, var(--blob-c), transparent 70%),
+    radial-gradient(30% 40% at 30% 80%, var(--blob-d), transparent 70%);
+  filter:blur(8px);
+  animation:heroDrift 16s ease-in-out infinite alternate
+}
+/* 一層柔光玻璃，讓色塊更通透 */
+.hero::after{
+  content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;
+  background:linear-gradient(160deg,rgba(255,255,255,.10),rgba(255,255,255,0) 45%)
+}
+@keyframes heroDrift{
+  0%{transform:translate(0,0) rotate(0deg)}
+  50%{transform:translate(4%,-3%) rotate(8deg)}
+  100%{transform:translate(-3%,3%) rotate(-6deg)}
+}
+.hero-top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.hero-label{display:flex;align-items:center;gap:10px;font-size:20px;font-weight:700;letter-spacing:.04em;color:var(--hero-sub)}
+.hero-label svg{width:22px;height:22px;color:var(--hero-accent)}
+.hero-time{font-size:clamp(52px,9vw,96px);font-weight:700;line-height:1;color:var(--time-ink);font-variant-numeric:tabular-nums;letter-spacing:-.01em;text-shadow:var(--time-glow)}
+.hero-date small{color:var(--hero-sub)}
+.hero-time time{display:flex;flex-wrap:wrap;align-items:baseline;column-gap:22px;row-gap:6px}
+.hero-clock{letter-spacing:-.03em}
+.hero-date{font-size:clamp(30px,4.6vw,46px);font-weight:700;letter-spacing:-.01em}
+.hero-date small{font-family:'Noto Sans TC',sans-serif;font-size:.6em;font-weight:500;margin-left:4px;opacity:.85}
+.clock-hand{transform-origin:12px 12px;animation:spin 6s linear infinite}
+
+.side{flex:1 1 260px;min-width:0;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;display:flex;flex-direction:column;gap:18px}
+.kv{display:flex;flex-direction:column;gap:4px}
+.kv .k{font-size:13px;color:var(--ink-3)}
+.kv .v{font-size:22px;font-weight:600;color:var(--accent-ink)}
+.kv .v.countdown{font-size:clamp(28px,3.2vw,34px);font-weight:700;color:var(--ink-2);font-variant-numeric:tabular-nums;line-height:1.1}
+.kv .v.countdown .unit{font-family:'Noto Sans TC',sans-serif;font-size:.55em;font-weight:500;color:var(--ink-3);margin:0 .3em 0 .1em}
+.kv .v.countdown.over{font-family:'Noto Sans TC',sans-serif;font-size:17px;line-height:1.5}
+.hero-note{margin:0;display:flex;gap:8px;align-items:flex-start;font-size:15px;font-weight:500;line-height:1.6;color:var(--hero-sub)}
+.hero-note svg{flex:none;margin-top:5px}
+.kv .v.now{font-size:18px;font-weight:500;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.kv .v.elapsed{color:var(--accent-ink)}
+.hr{height:1px;background:var(--divider)}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px 32px;display:flex;flex-direction:column;gap:22px}
+.card-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px}
+h2{margin:0;font-size:18px;font-weight:700}
+.updated{font-size:13px;color:var(--ink-3)}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;list-style:none;margin:0;padding:0}
+.step{display:flex;flex-direction:column;gap:10px}
+.bar{position:relative;height:6px;border-radius:999px;overflow:hidden;background:var(--bar-idle);transition:background .4s}
+.step.done .bar{background:var(--bar-done)}
+.step.active .bar{background:linear-gradient(90deg,var(--accent),#4C6EF5 55%,#9756D6)}
+/* 進行中的進度條：光流往右（四個階段一致） */
+.step.active .bar::after{
+  content:"";position:absolute;top:0;bottom:0;left:0;width:40%;
+  background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.55),rgba(255,255,255,0));
+  animation:shimmer 1.6s ease-in-out infinite
+}
+
+/* 主視覺：每個階段一個場景 */
+.scene-wrap{display:flex;align-items:center;gap:12px}
+.scene-cap{font-size:13px;font-weight:500;color:var(--hero-sub);min-width:5em;text-align:right}
+.scene{display:none}
+html[data-phase="0"] .scene[data-scene="0"],
+html[data-phase="1"] .scene[data-scene="1"],
+html[data-phase="2"] .scene[data-scene="2"],
+html[data-phase="3"] .scene[data-scene="3"]{display:block;animation:sceneIn .5s ease-out}
+
+/* 場景 0：連線逐一中斷、上鎖 */
+.s0-link{stroke-dasharray:3 4;animation:linkOff 3s ease-in-out infinite}
+.s0-link.l2{animation-delay:.4s}
+.s0-link.l3{animation-delay:.8s}
+.s0-user{animation:userOff 3s ease-in-out infinite}
+.s0-user.u2{animation-delay:.4s}
+.s0-user.u3{animation-delay:.8s}
+.s0-shackle{animation:lockDown 3s ease-in-out infinite}
+
+/* 場景 2：掃描線＋逐項打勾 */
+.s2-scan{animation:scanY 1.6s ease-in-out infinite alternate}
+.s2-check{stroke-dasharray:14;stroke-dashoffset:14;animation:draw 3s ease-out infinite}
+.s2-check.c2{animation-delay:.5s}
+.s2-check.c3{animation-delay:1s}
+
+/* 場景 3：啟動波紋＋流量送出 */
+.s3-ring{transform-box:fill-box;transform-origin:center;animation:ring 2s ease-out infinite}
+.s3-ring.r2{animation-delay:1s}
+.s3-out{animation:flowOut 1.6s linear infinite}
+.s3-out.o2{animation-delay:.53s}
+.s3-out.o3{animation-delay:1.06s}
+.s3-user{animation:userOn 1.6s ease-in-out infinite}
+.step-name{display:flex;align-items:center;gap:8px}
+.step-name .no{font-size:12px;color:var(--ink-3)}
+.step-name .label{font-size:15px;font-weight:500;color:var(--ink-3)}
+.step.done .label,.step.active .label{color:var(--ink)}
+.step.active .label{font-weight:700}
+.step-state{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ink-3)}
+.step.active .step-state{color:var(--g2)}
+.step.active .step-state .txt{background:linear-gradient(90deg,#2AA3AB,#4C6EF5 55%,#9756D6);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:700}
+.step.active .step-state .blink{background:linear-gradient(135deg,#2AA3AB,#4C6EF5 55%,#9756D6)}
+.step-state .blink{display:none;width:6px;height:6px;border-radius:999px;background:currentColor;animation:blink 1.8s ease-in-out infinite}
+.step.active .step-state .blink{display:inline-block}
+
+.info{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.info div{display:flex;flex-direction:column;gap:10px;padding:4px}
+h3{margin:0;font-size:15px;font-weight:700}
+.info p{margin:0;font-size:15px;line-height:1.7;color:var(--ink-2)}
+a{color:var(--accent-ink)}
+
+footer{padding:20px 32px;border-top:1px solid var(--border);display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;font-size:13px;color:var(--ink-3)}
+
+/* demo controls */
+.head-right{flex-wrap:wrap}
+.demo{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-3)}
+.seg{display:flex;padding:3px;gap:2px;border:1px solid var(--border);border-radius:10px;background:var(--surface)}
+.seg button{min-width:40px;min-height:36px;padding:0 10px;border:0;border-radius:7px;background:transparent;color:var(--ink-2);font-family:'IBM Plex Mono',monospace;font-size:13px;cursor:pointer}
+.seg button:hover{color:var(--ink)}
+.seg button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.seg button[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent-on-soft);font-weight:600}
+
+@keyframes ripple{0%{transform:scale(1);opacity:.55}100%{transform:scale(2.8);opacity:0}}
+@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(250%)}}
+@keyframes flow{0%{transform:translateX(0);opacity:0}15%{opacity:1}85%{opacity:1}100%{transform:translateX(84px);opacity:0}}
+@keyframes blink{0%,100%{opacity:.35}50%{opacity:1}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes stripes{to{background-position:17px 0}}
+@keyframes scanX{0%{left:0}100%{left:82%}}
+@keyframes fillUp{0%{transform:scaleX(0)}70%,100%{transform:scaleX(1)}}
+@keyframes sceneIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@keyframes linkOff{0%,15%{opacity:1}55%,100%{opacity:.12}}
+@keyframes userOff{0%,15%{opacity:1}55%,100%{opacity:.25}}
+@keyframes lockDown{0%,45%{transform:translateY(-5px)}60%,100%{transform:translateY(0)}}
+@keyframes scanY{0%{transform:translateY(0)}100%{transform:translateY(34px)}}
+@keyframes draw{0%,10%{stroke-dashoffset:14}35%,100%{stroke-dashoffset:0}}
+@keyframes ring{0%{transform:scale(.6);opacity:.8}100%{transform:scale(1.7);opacity:0}}
+@keyframes flowOut{0%{transform:translateX(0);opacity:0}15%{opacity:1}85%{opacity:1}100%{transform:translateX(70px);opacity:0}}
+@keyframes userOn{0%,100%{opacity:.55}50%{opacity:1}}
+@keyframes ellipsis{0%,60%,100%{opacity:.2}30%{opacity:1}}
+.flow{animation:flow 1.8s linear infinite}
+.flow.d2{animation-delay:.6s}
+.flow.d3{animation-delay:1.2s}
+.led{animation:blink 1.8s ease-in-out infinite}
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none !important;transition:none !important}
+  .flow{opacity:0}
+}
+@media (max-width:560px){
+  header,footer{padding-left:16px;padding-right:16px}
+  main{padding:40px 16px 32px}
+  .hero,.card{padding:24px 20px}
+}
+/* ── 隱藏小遊戲：資料搬運蛇 ── */
+#statusPill{cursor:default;user-select:none}
+.game{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(6,14,16,.55);backdrop-filter:blur(6px)}
+.game[hidden]{display:none}
+.game-box{width:100%;max-width:420px;background:var(--surface);color:var(--ink);border:1px solid var(--border);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:12px;box-shadow:0 30px 60px -20px rgba(0,0,0,.45)}
+.game-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.game-head h2{font-size:17px}
+.game-close{width:44px;height:44px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--ink-2);cursor:pointer;display:flex;align-items:center;justify-content:center}
+.game-close:hover{color:var(--ink);border-color:var(--accent)}
+.game-close:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.game-stats{display:flex;gap:20px;font-size:13px;color:var(--ink-3)}
+.game-stats b{font-family:'IBM Plex Mono',monospace;font-size:16px;color:var(--ink);margin-left:6px}
+.game-stage{position:relative;border-radius:14px;overflow:hidden;border:1px solid var(--border);background:var(--bg)}
+.game-stage canvas{display:block;width:100%;height:auto;touch-action:none}
+.game-msg{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:16px;background:color-mix(in srgb,var(--bg) 78%,transparent);font-size:15px;color:var(--ink-2)}
+.game-msg[hidden]{display:none}
+.game-msg strong{font-size:22px;color:var(--ink)}
+.game-msg button{min-height:44px;padding:0 20px;border-radius:10px;border:0;background:var(--accent);color:#0B1416;font:inherit;font-weight:700;cursor:pointer}
+.game-msg button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.game-hint{font-size:12px;color:var(--ink-3);text-align:center}
+.game-pad{display:none;grid-template-columns:repeat(3,52px);gap:6px;justify-content:center}
+.game-pad button{height:44px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--ink-2);font-size:18px;cursor:pointer}
+@media (hover:none){.game-pad{display:grid}}
+</style>
+</head>
+<body>
+
+<main>
+  <div class="wrap">
+    <section class="intro">
+      <div class="intro-top">
+      <div class="pill" id="statusPill"><span class="dot"><i class="ripple"></i><i></i></span><span data-i18n="pill">計畫性停線 · 資料庫遷移</span></div>
+        <div class="intro-actions">
+        <button class="lang-btn" id="themeBtn" type="button" data-i18n-aria="themeAria" aria-label="切換深色／淺色模式">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path></svg>
+          <span id="themeLabel">深色</span>
+        </button>
+        <button class="lang-btn" id="langBtn" type="button" data-i18n-aria="langAria" aria-label="Switch to English">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18"></path><path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18z"></path></svg>
+          <span data-i18n="langBtn">EN</span>
+        </button>
+        </div>
+      </div>
+      <h1><span class="h1-text" data-i18n="title">eRD 維護中</span><span class="ellipsis" aria-hidden="true"><span>.</span><span>.</span><span>.</span></span></h1>
+      <p class="lead" data-i18n="lead">為進行資料庫遷移（DB migration），eRD（RD Portal）暫停服務。完成驗證後將立即恢復，造成不便敬請見諒。</p>
+    </section>
+
+    <div class="row">
+      <section class="hero" aria-labelledby="eta-label">
+        <div class="hero-top">
+          <div class="hero-label">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path class="clock-hand" d="M12 12V7"></path><path d="M12 12l3 2"></path></svg>
+            <span id="eta-label" data-i18n="eta">預計回線時間</span>
+          </div>
+          <div class="scene-wrap">
+          <span class="scene-cap" id="sceneCap" aria-live="polite"></span>
+
+          <!-- 01 停線準備：使用者連線逐一中斷，資料庫上鎖 -->
+          <svg class="scene" data-scene="0" width="168" height="56" viewBox="0 0 168 56" fill="none" role="img" data-i18n-aria="scene0" aria-label="停線準備：關閉使用者連線並鎖定資料庫">
+            <g fill="var(--hero-ink-2)">
+              <circle class="s0-user" cx="10" cy="12" r="4"></circle>
+              <circle class="s0-user u2" cx="10" cy="28" r="4"></circle>
+              <circle class="s0-user u3" cx="10" cy="44" r="4"></circle>
+            </g>
+            <g stroke="var(--hero-ink-2)" stroke-width="1.4">
+              <line class="s0-link" x1="18" y1="12" x2="110" y2="24"></line>
+              <line class="s0-link l2" x1="18" y1="28" x2="110" y2="28"></line>
+              <line class="s0-link l3" x1="18" y1="44" x2="110" y2="32"></line>
+            </g>
+            <g stroke="var(--hero-ink-2)" stroke-width="1.6">
+              <ellipse cx="138" cy="14" rx="16" ry="5"></ellipse>
+              <path d="M122 14v28c0 2.8 7.2 5 16 5s16-2.2 16-5V14"></path>
+              <path d="M122 28c0 2.8 7.2 5 16 5s16-2.2 16-5"></path>
+            </g>
+            <g stroke="var(--hero-accent)" stroke-width="1.8" stroke-linecap="round">
+              <rect x="150" y="34" width="14" height="11" rx="2" fill="var(--hero-bg)"></rect>
+              <path class="s0-shackle" d="M153 34v-3a4 4 0 0 1 8 0v3"></path>
+            </g>
+          </svg>
+
+          <!-- 02 資料庫遷移：資料由舊庫流向新庫 -->
+          <svg class="scene" data-scene="1" width="168" height="56" viewBox="0 0 168 56" fill="none" role="img" data-i18n-aria="scene1" aria-label="資料由舊資料庫遷移至新資料庫">
+            <g stroke="var(--hero-ink-2)" stroke-width="1.6">
+              <ellipse cx="22" cy="12" rx="16" ry="5"></ellipse>
+              <path d="M6 12v30c0 2.8 7.2 5 16 5s16-2.2 16-5V12"></path>
+              <path d="M6 27c0 2.8 7.2 5 16 5s16-2.2 16-5"></path>
+            </g>
+            <g stroke="var(--hero-accent)" stroke-width="1.6">
+              <ellipse cx="146" cy="12" rx="16" ry="5"></ellipse>
+              <path d="M130 12v30c0 2.8 7.2 5 16 5s16-2.2 16-5V12"></path>
+              <path d="M130 27c0 2.8 7.2 5 16 5s16-2.2 16-5"></path>
+            </g>
+            <line x1="44" y1="29" x2="124" y2="29" stroke="var(--hero-ink-2)" stroke-width="1.2" stroke-dasharray="2 5" opacity=".6"></line>
+            <circle class="flow" cx="42" cy="29" r="3.5" fill="var(--hero-accent)"></circle>
+            <circle class="flow d2" cx="42" cy="29" r="3.5" fill="var(--hero-accent)"></circle>
+            <circle class="flow d3" cx="42" cy="29" r="3.5" fill="var(--hero-accent)"></circle>
+            <circle class="led" cx="146" cy="38" r="2" fill="var(--hero-accent)"></circle>
+          </svg>
+
+          <!-- 03 資料驗證：掃描新庫，清單逐項打勾 -->
+          <svg class="scene" data-scene="2" width="168" height="56" viewBox="0 0 168 56" fill="none" role="img" data-i18n-aria="scene2" aria-label="資料驗證：掃描新資料庫並逐項核對">
+            <g stroke-linecap="round" stroke-linejoin="round">
+              <g stroke="var(--hero-ink-2)" stroke-width="1.4" opacity=".7">
+                <line x1="26" y1="12" x2="68" y2="12"></line>
+                <line x1="26" y1="28" x2="62" y2="28"></line>
+                <line x1="26" y1="44" x2="66" y2="44"></line>
+              </g>
+              <g stroke="var(--hero-accent)" stroke-width="2">
+                <path class="s2-check" d="M6 12l4 4 8-8"></path>
+                <path class="s2-check c2" d="M6 28l4 4 8-8"></path>
+                <path class="s2-check c3" d="M6 44l4 4 8-8"></path>
+              </g>
+            </g>
+            <g stroke="var(--hero-accent)" stroke-width="1.6">
+              <ellipse cx="132" cy="12" rx="16" ry="5"></ellipse>
+              <path d="M116 12v30c0 2.8 7.2 5 16 5s16-2.2 16-5V12"></path>
+              <path d="M116 27c0 2.8 7.2 5 16 5s16-2.2 16-5"></path>
+            </g>
+            <g class="s2-scan">
+              <rect x="108" y="9" width="48" height="2" rx="1" fill="var(--hero-accent)"></rect>
+              <rect x="108" y="11" width="48" height="8" fill="var(--hero-accent)" opacity=".15"></rect>
+            </g>
+            <g stroke="var(--hero-ink-2)" stroke-width="1.4" stroke-linecap="round">
+              <path d="M102 6h-4v6"></path><path d="M162 6h4v6"></path>
+              <path d="M102 50h-4v-6"></path><path d="M162 50h4v-6"></path>
+            </g>
+          </svg>
+
+          <!-- 04 恢復服務：新庫啟動，流量送回使用者 -->
+          <svg class="scene" data-scene="3" width="168" height="56" viewBox="0 0 168 56" fill="none" role="img" data-i18n-aria="scene3" aria-label="恢復服務：新資料庫啟動並重新開放連線">
+            <circle class="s3-ring" cx="26" cy="28" r="22" stroke="var(--hero-accent)" stroke-width="1.4"></circle>
+            <circle class="s3-ring r2" cx="26" cy="28" r="22" stroke="var(--hero-accent)" stroke-width="1.4"></circle>
+            <g stroke="var(--hero-accent)" stroke-width="1.6">
+              <ellipse cx="26" cy="14" rx="14" ry="4.5"></ellipse>
+              <path d="M12 14v26c0 2.5 6.3 4.5 14 4.5s14-2 14-4.5V14"></path>
+              <path d="M12 27c0 2.5 6.3 4.5 14 4.5s14-2 14-4.5"></path>
+            </g>
+            <line x1="52" y1="28" x2="132" y2="28" stroke="var(--hero-ink-2)" stroke-width="1.2" stroke-dasharray="2 5" opacity=".6"></line>
+            <circle class="s3-out" cx="54" cy="28" r="3.5" fill="var(--hero-accent)"></circle>
+            <circle class="s3-out o2" cx="54" cy="28" r="3.5" fill="var(--hero-accent)"></circle>
+            <circle class="s3-out o3" cx="54" cy="28" r="3.5" fill="var(--hero-accent)"></circle>
+            <g fill="var(--hero-accent)">
+              <circle class="s3-user" cx="150" cy="12" r="4"></circle>
+              <circle class="s3-user" cx="158" cy="28" r="4"></circle>
+              <circle class="s3-user" cx="150" cy="44" r="4"></circle>
+            </g>
+            <line x1="132" y1="28" x2="146" y2="14" stroke="var(--hero-ink-2)" stroke-width="1.2" opacity=".6"></line>
+            <line x1="132" y1="28" x2="152" y2="28" stroke="var(--hero-ink-2)" stroke-width="1.2" opacity=".6"></line>
+            <line x1="132" y1="28" x2="146" y2="42" stroke="var(--hero-ink-2)" stroke-width="1.2" opacity=".6"></line>
+          </svg>
+          </div>
+        </div>
+        <div class="hero-time mono"><time id="etaTime" datetime="2026-11-11T12:30+08:00"><span class="hero-date">2026/11/11<small data-i18n="weekday">（三）</small></span><span class="hero-clock">12:30</span></time></div>
+        <p class="hero-note"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5"></path><path d="M12 8h.01"></path></svg><span data-i18n="sideNote">實際回線時間可能依資料驗證進度提前或延後，如有異動將即時更新於本頁。</span></p>
+      </section>
+
+      <aside class="side">
+        <div class="kv"><div class="k" data-i18n="startLabel">停線開始</div><div class="v mono"><time datetime="2026-11-11T10:00+08:00">2026/11/11 10:00</time></div></div>
+        <div class="kv"><div class="k" data-i18n="durLabel">預計停線時長</div><div class="v mono" data-i18n="durValue">約 2.5 小時</div></div>
+        <div class="hr"></div>
+        <div class="kv"><div class="k" data-i18n="nowLabel">現在時間（UTC+8）</div><div class="v now mono" id="nowTime">--</div></div>
+      </aside>
+    </div>
+
+    <section class="card" aria-labelledby="progress-title">
+      <div class="card-head">
+        <h2 id="progress-title" data-i18n="progress">維護進度</h2>
+        <div class="updated mono"><span data-i18n="updatedLabel">最後更新</span> <span id="updatedTime"></span></div>
+      </div>
+      <ol class="steps" id="steps">
+        <li class="step"><div class="bar"></div><div class="step-name"><span class="no mono">01</span><span class="label" data-i18n="step0">停線準備</span></div><div class="step-state"><span class="blink"></span><span class="txt"></span></div></li>
+        <li class="step"><div class="bar"></div><div class="step-name"><span class="no mono">02</span><span class="label" data-i18n="step1">資料庫遷移</span></div><div class="step-state"><span class="blink"></span><span class="txt"></span></div></li>
+        <li class="step"><div class="bar"></div><div class="step-name"><span class="no mono">03</span><span class="label" data-i18n="step2">資料驗證</span></div><div class="step-state"><span class="blink"></span><span class="txt"></span></div></li>
+        <li class="step"><div class="bar"></div><div class="step-name"><span class="no mono">04</span><span class="label" data-i18n="step3">恢復服務</span></div><div class="step-state"><span class="blink"></span><span class="txt"></span></div></li>
+      </ol>
+    </section>
+
+    <section class="info">
+      <div><h3 data-i18n="i1h">維護期間</h3><p data-i18n="i1p">eRD 所有頁面與功能（含查詢、資料上傳與報表）皆暫停使用。</p></div>
+      <div><h3 data-i18n="i2h">您的資料</h3><p data-i18n="i2p">既有資料將完整遷移至新資料庫，回線後可照常使用。</p></div>
+      <div><h3 data-i18n="i3h">需要協助</h3><p data-i18n="i3p">緊急需求請聯繫 PDIT / 翁庭勇 / TYWENG。</p></div>
+    </section>
+  </div>
+</main>
+
+
+<!-- 隱藏小遊戲：連點「計畫性停線」標籤五下，或輸入 ↑↑↓↓←→←→BA -->
+<div class="game" id="game" hidden role="dialog" aria-modal="true" aria-labelledby="gameTitle">
+  <div class="game-box">
+    <div class="game-head">
+      <h2 id="gameTitle" data-i18n="gameTitle">資料搬運蛇</h2>
+      <button class="game-close" id="gameClose" type="button" data-i18n-aria="gameClose" aria-label="關閉遊戲">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+      </button>
+    </div>
+    <div class="game-stats"><span><span data-i18n="gameScore">已搬運</span><b id="gScore">0</b></span><span><span data-i18n="gameBest">最高紀錄</span><b id="gBest">0</b></span></div>
+    <div class="game-stage">
+      <canvas id="gCanvas" width="360" height="360" aria-label="Snake game"></canvas>
+      <div class="game-msg" id="gMsg">
+        <strong id="gMsgTitle" data-i18n="gameReadyTitle">等回線的空檔，來搬點資料？</strong>
+        <span id="gMsgText" data-i18n="gameReadyText">吃掉資料塊，把它們搬到新資料庫。別撞牆、別咬到自己。</span>
+        <button type="button" id="gStart" data-i18n="gameStart">開始</button>
+      </div>
+    </div>
+    <div class="game-pad" aria-hidden="true">
+      <span></span><button type="button" data-dir="up">↑</button><span></span>
+      <button type="button" data-dir="left">←</button><button type="button" data-dir="down">↓</button><button type="button" data-dir="right">→</button>
+    </div>
+    <div class="game-hint" data-i18n="gameHint">方向鍵 / WASD 移動 · 空白鍵暫停 · Esc 關閉</div>
+  </div>
+</div>
+
+<script>
+// ── 維護排程：階段會依時間自動切換
+//    01 停線準備 15 分 → 02 資料庫遷移 60 分 → 03 資料驗證 60 分 → 04 恢復服務 15 分
+var MAINT_START = '2026-11-11T10:00:00+08:00';
+var PHASE_MINUTES = [15, 60, 60, 15];
+// 需要手動指定階段時填 0–3（例如進度落後），平常保持 null 讓它自動跑
+var FORCE_PHASE = null;
+
+// ── 中英文案
+var I18N = {
+  zh: {
+    pageTitle: 'eRD 維護中',
+    demoAria: '預覽：切換目前階段', demoLabel: '預覽階段',
+    langBtn: 'EN', langAria: 'Switch to English',
+    themeAria: '切換深色／淺色模式', themeDark: '深色', themeLight: '淺色',
+    pill: '計畫性停線 · 資料庫遷移',
+    title: 'eRD 維護中',
+    lead: '為進行資料庫遷移（DB migration），eRD（RD Portal）暫停服務。完成驗證後將立即恢復，造成不便敬請見諒。',
+    eta: '預計回線時間',
+    countdownLabel: '距離預計回線', nowLabel: '現在時間（UTC+8）', dayUnit: '天', sideNote: '實際回線時間可能依資料驗證進度提前或延後，如有異動將即時更新於本頁。', overdue: '已超過預計時間，仍在全力處理中',
+    weekday: '（三）',
+    startLabel: '停線開始', durLabel: '預計停線時長', durValue: '約 2.5 小時',
+    progress: '維護進度', updatedLabel: '最後更新',
+    step0: '停線準備', step1: '資料庫遷移', step2: '資料驗證', step3: '恢復服務',
+    done: '已完成', active: '進行中', pending: '待進行',
+    cap: ['關閉連線中', '資料搬移中', '資料核對中', '服務啟動中'],
+    scene0: '停線準備：關閉使用者連線並鎖定資料庫',
+    scene1: '資料由舊資料庫遷移至新資料庫',
+    scene2: '資料驗證：掃描新資料庫並逐項核對',
+    scene3: '恢復服務：新資料庫啟動並重新開放連線',
+    i1h: '維護期間', i1p: 'eRD 所有頁面與功能（含查詢、資料上傳與報表）皆暫停使用。',
+    i2h: '您的資料', i2p: '既有資料將完整遷移至新資料庫，回線後可照常使用。',
+    gameTitle: '資料搬運蛇', gameClose: '關閉遊戲', gameScore: '已搬運', gameBest: '最高紀錄',
+    gameReadyTitle: '等回線的空檔，來搬點資料？', gameReadyText: '吃掉資料塊，把它們搬到新資料庫。別撞牆、別咬到自己。',
+    gameStart: '開始', gameAgain: '再搬一次', gameOverTitle: '資料搬運中斷！', gameOverText: '這次搬了 {n} 筆資料。',
+    gamePaused: '暫停中', gameResume: '繼續', gameHint: '方向鍵 / WASD 移動 · 空白鍵暫停 · Esc 關閉',
+    i3h: '需要協助', i3p: '緊急需求請聯繫 PDIT / 翁庭勇 / TYWENG。'
+  },
+  en: {
+    pageTitle: 'eRD is under maintenance',
+    demoAria: 'Preview: switch current phase', demoLabel: 'Preview phase',
+    langBtn: '中文', langAria: '切換為中文',
+    themeAria: 'Toggle dark / light mode', themeDark: 'Dark', themeLight: 'Light',
+    pill: 'Scheduled downtime · Database migration',
+    title: 'eRD is under maintenance',
+    lead: 'eRD (RD Portal) is temporarily unavailable while we migrate its database. Service will resume as soon as validation is complete. We apologize for the inconvenience.',
+    eta: 'Estimated back online',
+    countdownLabel: 'Time remaining', nowLabel: 'Current time (UTC+8)', dayUnit: 'd', sideNote: 'The actual time may be earlier or later depending on validation progress. Any changes will be posted on this page.', overdue: 'Past the estimated time — we are still working on it',
+    weekday: ' Wed',
+    startLabel: 'Downtime started', durLabel: 'Expected duration', durValue: 'About 2.5 hours',
+    progress: 'Maintenance progress', updatedLabel: 'Last updated',
+    step0: 'Preparation', step1: 'Database migration', step2: 'Data validation', step3: 'Service restoration',
+    done: 'Done', active: 'In progress', pending: 'Up next',
+    cap: ['Closing connections', 'Moving data', 'Verifying data', 'Starting up'],
+    scene0: 'Preparation: closing user connections and locking the database',
+    scene1: 'Data moving from the old database to the new one',
+    scene2: 'Data validation: scanning the new database and checking each item',
+    scene3: 'Service restoration: the new database starts up and reopens connections',
+    i1h: 'During maintenance', i1p: 'All eRD pages and features, including queries, data uploads and reports, are unavailable.',
+    i2h: 'Your data', i2p: 'All existing data will be migrated to the new database. Once we are back online, everything will work as usual.',
+    gameTitle: 'Data Snake', gameClose: 'Close game', gameScore: 'Moved', gameBest: 'Best',
+    gameReadyTitle: 'Waiting for us to come back?', gameReadyText: 'Eat the data blocks and carry them to the new database. Avoid the walls and your own tail.',
+    gameStart: 'Start', gameAgain: 'Play again', gameOverTitle: 'Migration interrupted!', gameOverText: 'You moved {n} records this time.',
+    gamePaused: 'Paused', gameResume: 'Resume', gameHint: 'Arrow keys / WASD to move · Space to pause · Esc to close',
+    i3h: 'Need help?', i3p: 'For urgent requests, please contact PDIT / 翁庭勇 / TYWENG.'
+  }
+};
+
+(function () {
+  var root = document.documentElement;
+  var steps = document.querySelectorAll('#steps .step');
+  var btns = document.querySelectorAll('.demo button[data-phase]');
+  var lang = 'zh', phase = 0, manualPreview = false;
+  var startMs = new Date(MAINT_START).getTime();
+  function scheduledPhase(now) {
+    if (FORCE_PHASE !== null) return FORCE_PHASE;
+    var mins = (now - startMs) / 60000, acc = 0;
+    if (mins < 0) return 0;
+    for (var i = 0; i < PHASE_MINUTES.length; i++) { acc += PHASE_MINUTES[i]; if (mins < acc) return i; }
+    return PHASE_MINUTES.length - 1; // 超過排程仍停在「恢復服務」
+  }
+  phase = scheduledPhase(Date.now());
+  // 「最後更新」＝目前階段的開始時間（台北時間）
+  function phaseStartLabel(p) {
+    var mins = 0; for (var i = 0; i < p; i++) mins += PHASE_MINUTES[i];
+    var d = new Date(startMs + mins * 60000);
+    var parts = {}; new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Taipei', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false })
+      .formatToParts(d).forEach(function (x) { parts[x.type] = x.value; });
+    return parts.year + '/' + parts.month + '/' + parts.day + ' ' + parts.hour + ':' + parts.minute;
+  }
+  steps.forEach(function (el, i) { el.dataset.i = i; });
+
+  function t(k) { return I18N[lang][k]; }
+
+  function setPhase(p) {
+    phase = p;
+    root.dataset.phase = p;
+    document.getElementById('updatedTime').textContent = phaseStartLabel(p);
+    document.getElementById('sceneCap').textContent = t('cap')[p];
+    steps.forEach(function (el, i) {
+      el.classList.toggle('done', i < p);
+      el.classList.toggle('active', i === p);
+      el.querySelector('.txt').textContent = i < p ? t('done') : i === p ? t('active') : t('pending');
+      if (i === p) el.setAttribute('aria-current', 'step'); else el.removeAttribute('aria-current');
+    });
+    btns.forEach(function (b) { b.setAttribute('aria-pressed', String(+b.dataset.phase === p)); });
+  }
+
+  function setLang(l) {
+    lang = l;
+    root.lang = l === 'en' ? 'en' : 'zh-Hant';
+    document.title = t('pageTitle');
+    document.querySelectorAll('[data-i18n]').forEach(function (el) { el.textContent = t(el.dataset.i18n); });
+    document.querySelectorAll('[data-i18n-aria]').forEach(function (el) { el.setAttribute('aria-label', t(el.dataset.i18nAria)); });
+    document.querySelectorAll('[data-i18n-title]').forEach(function (el) { el.setAttribute('title', t(el.dataset.i18nTitle)); });
+    setPhase(phase);
+    syncTheme();
+  }
+
+  // 深色／淺色切換（預設跟隨系統）
+  var themeBtn = document.getElementById('themeBtn'), themeLabel = document.getElementById('themeLabel');
+  var mq = window.matchMedia('(prefers-color-scheme: dark)');
+  function isDark() { var v = root.getAttribute('data-theme'); return v ? v === 'dark' : mq.matches; }
+  function syncTheme() { if (themeLabel) themeLabel.textContent = isDark() ? t('themeLight') : t('themeDark'); }
+  try { var saved = localStorage.getItem('erd-theme'); if (saved) root.setAttribute('data-theme', saved); } catch (e) {}
+  if (themeBtn) themeBtn.addEventListener('click', function () {
+    var next = isDark() ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem('erd-theme', next); } catch (e) {}
+    syncTheme();
+  });
+  mq.addEventListener && mq.addEventListener('change', syncTheme);
+
+  // 語言：網址 ?lang=en 優先，其次記住的選擇，再來看瀏覽器語言
+  var initial = 'zh';
+  try {
+    var q = new URLSearchParams(location.search).get('lang');
+    var savedLang = localStorage.getItem('erd-lang');
+    if (q === 'en' || q === 'zh') initial = q;
+    else if (savedLang === 'en' || savedLang === 'zh') initial = savedLang;
+    else if (!/^zh/i.test(navigator.language || '')) initial = 'en';
+  } catch (e) {}
+  document.getElementById('langBtn').addEventListener('click', function () {
+    var next = lang === 'zh' ? 'en' : 'zh';
+    try { localStorage.setItem('erd-lang', next); } catch (e) {}
+    setLang(next);
+  });
+
+  btns.forEach(function (b) { b.addEventListener('click', function () { manualPreview = true; setPhase(+b.dataset.phase); }); });
+
+
+  // 現在時間 + 倒數（目標讀自 #etaTime 的 datetime，改時間只要改那裡）
+  var eta = new Date(document.getElementById('etaTime').getAttribute('datetime')).getTime();
+  var cdEl = document.getElementById('countdown'), nowEl = document.getElementById('nowTime');
+  var fmt = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Taipei', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function tick() {
+    if (!manualPreview) { var sp = scheduledPhase(Date.now()); if (sp !== phase) setPhase(sp); }
+    var now = Date.now();
+    var p = {}; fmt.formatToParts(new Date(now)).forEach(function (x) { p[x.type] = x.value; });
+    nowEl.textContent = p.year + '/' + p.month + '/' + p.day + ' ' + p.hour + ':' + p.minute + ':' + p.second;
+    if (!cdEl) return; // 倒數已拿掉；要恢復就把 #countdown 區塊加回右側卡片
+    var diff = Math.floor((eta - now) / 1000);
+    if (diff <= 0) {
+      cdEl.classList.add('over');
+      cdEl.textContent = t('overdue');
+      return;
+    }
+    cdEl.classList.remove('over');
+    var d = Math.floor(diff / 86400), h = Math.floor(diff % 86400 / 3600), m = Math.floor(diff % 3600 / 60), sec = diff % 60;
+    cdEl.innerHTML = (d > 0 ? d + '<span class="unit">' + t('dayUnit') + '</span>' : '') + pad(h) + ':' + pad(m) + ':' + pad(sec);
+  }
+  var _setLang = setLang;
+  setLang = function (l) { _setLang(l); tick(); };
+  tick();
+  setInterval(tick, 1000);
+
+  setLang(initial);
+})();
+</script>
+<script>
+// ── 隱藏小遊戲：資料搬運蛇 ──
+(function () {
+  var game = document.getElementById('game'), cvs = document.getElementById('gCanvas'), ctx = cvs.getContext('2d');
+  var msg = document.getElementById('gMsg'), msgT = document.getElementById('gMsgTitle'), msgP = document.getElementById('gMsgText'), startBtn = document.getElementById('gStart');
+  var scoreEl = document.getElementById('gScore'), bestEl = document.getElementById('gBest');
+  var N = 18, C = cvs.width / N;
+  var snake, dir, nextDir, food, score, timer, state = 'ready', lastFocus = null;
+  var best = 0; try { best = +localStorage.getItem('erd-snake-best') || 0; } catch (e) {}
+  bestEl.textContent = best;
+
+  function L(k) { var l = document.documentElement.lang === 'en' ? 'en' : 'zh'; return I18N[l][k]; }
+  function css(v) { return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+
+  function open() {
+    if (!game.hidden) return;
+    lastFocus = document.activeElement;
+    game.hidden = false; reset(); showMsg('ready'); startBtn.focus();
+  }
+  function close() {
+    stop(); game.hidden = true; state = 'ready';
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+  function reset() {
+    snake = [{ x: 8, y: 9 }, { x: 7, y: 9 }, { x: 6, y: 9 }];
+    dir = nextDir = { x: 1, y: 0 }; score = 0; scoreEl.textContent = 0; placeFood(); draw();
+  }
+  function placeFood() {
+    do { food = { x: Math.floor(Math.random() * N), y: Math.floor(Math.random() * N) }; }
+    while (snake.some(function (p) { return p.x === food.x && p.y === food.y; }));
+  }
+  function speed() { return Math.max(70, 150 - score * 4); }
+  function start() { reset(); state = 'run'; msg.hidden = true; loop(); }
+  function loop() { stop(); timer = setTimeout(function () { step(); if (state === 'run') loop(); }, speed()); }
+  function stop() { clearTimeout(timer); }
+  function pause() {
+    if (state === 'run') { state = 'pause'; stop(); showMsg('pause'); }
+    else if (state === 'pause') { state = 'run'; msg.hidden = true; loop(); }
+  }
+  function showMsg(kind) {
+    msg.hidden = false;
+    if (kind === 'ready') { msgT.textContent = L('gameReadyTitle'); msgP.textContent = L('gameReadyText'); startBtn.textContent = L('gameStart'); }
+    if (kind === 'over') { msgT.textContent = L('gameOverTitle'); msgP.textContent = L('gameOverText').replace('{n}', score); startBtn.textContent = L('gameAgain'); }
+    if (kind === 'pause') { msgT.textContent = L('gamePaused'); msgP.textContent = ''; startBtn.textContent = L('gameResume'); }
+    startBtn.focus();
+  }
+  function step() {
+    dir = nextDir;
+    var h = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
+    var hitWall = h.x < 0 || h.y < 0 || h.x >= N || h.y >= N;
+    var hitSelf = snake.some(function (p, i) { return i < snake.length - 1 && p.x === h.x && p.y === h.y; });
+    if (hitWall || hitSelf) {
+      state = 'over'; stop();
+      if (score > best) { best = score; bestEl.textContent = best; try { localStorage.setItem('erd-snake-best', best); } catch (e) {} }
+      draw(true); showMsg('over'); return;
+    }
+    snake.unshift(h);
+    if (h.x === food.x && h.y === food.y) { score++; scoreEl.textContent = score; placeFood(); }
+    else snake.pop();
+    draw();
+  }
+  function rr(x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
+  function draw(dead) {
+    var bg = css('--bg'), grid = css('--divider'), accent = css('--accent'), ink = css('--ink');
+    ctx.fillStyle = bg; ctx.fillRect(0, 0, cvs.width, cvs.height);
+    ctx.fillStyle = grid;
+    for (var i = 0; i < N; i++) for (var j = 0; j < N; j++) ctx.fillRect(i * C + C / 2 - 1, j * C + C / 2 - 1, 2, 2);
+    // 資料塊：小資料庫圖示
+    var fx = food.x * C, fy = food.y * C;
+    ctx.fillStyle = '#9756D6'; rr(fx + 4, fy + 5, C - 8, C - 9, 3); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.fillRect(fx + 6, fy + 9, C - 12, 1.5); ctx.fillRect(fx + 6, fy + 13, C - 12, 1.5);
+    // 蛇：主色 → 藍 → 紫 漸層
+    var n = snake.length;
+    snake.forEach(function (p, idx) {
+      var t = n > 1 ? idx / (n - 1) : 0;
+      var c1 = [42, 163, 171], c2 = [76, 110, 245], c3 = [151, 86, 214], a, b, k;
+      if (t < .5) { a = c1; b = c2; k = t / .5; } else { a = c2; b = c3; k = (t - .5) / .5; }
+      ctx.fillStyle = dead && idx === 0 ? ink : 'rgb(' + a.map(function (v, q) { return Math.round(v + (b[q] - v) * k); }).join(',') + ')';
+      rr(p.x * C + 1.5, p.y * C + 1.5, C - 3, C - 3, idx === 0 ? 6 : 4); ctx.fill();
+    });
+    // 眼睛
+    var hd = snake[0]; ctx.fillStyle = '#fff';
+    var ex = hd.x * C + C / 2 + dir.x * 4, ey = hd.y * C + C / 2 + dir.y * 4;
+    ctx.beginPath(); ctx.arc(ex - dir.y * 4, ey - dir.x * 4, 2, 0, 7); ctx.arc(ex + dir.y * 4, ey + dir.x * 4, 2, 0, 7); ctx.fill();
+  }
+  function turn(d) {
+    var m = { up: { x: 0, y: -1 }, down: { x: 0, y: 1 }, left: { x: -1, y: 0 }, right: { x: 1, y: 0 } }[d];
+    if (!m || (m.x === -dir.x && m.y === -dir.y)) return;
+    nextDir = m;
+  }
+
+  // 觸發 1：連點 logo 五下
+  var clicks = 0, clickTimer;
+  document.getElementById('statusPill').addEventListener('click', function () {
+    clicks++; clearTimeout(clickTimer); clickTimer = setTimeout(function () { clicks = 0; }, 1500);
+    if (clicks >= 5) { clicks = 0; open(); }
+  });
+  // 觸發 2：↑↑↓↓←→←→BA
+  var code = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'], pos = 0;
+  document.addEventListener('keydown', function (e) {
+    if (game.hidden) {
+      var k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+      pos = k === code[pos] ? pos + 1 : (k === code[0] ? 1 : 0);
+      if (pos === code.length) { pos = 0; open(); }
+      return;
+    }
+    var keys = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right', w: 'up', s: 'down', a: 'left', d: 'right', W: 'up', S: 'down', A: 'left', D: 'right' };
+    if (e.key === 'Escape') { e.preventDefault(); close(); return; }
+    if (e.key === ' ' && (state === 'run' || state === 'pause')) { e.preventDefault(); pause(); return; }
+    if (keys[e.key]) { e.preventDefault(); if (state === 'run') turn(keys[e.key]); }
+    if (e.key === 'Tab') { // 焦點留在對話框內
+      var f = game.querySelectorAll('button:not([hidden])'), first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  });
+  startBtn.addEventListener('click', function () { if (state === 'pause') pause(); else start(); });
+  document.getElementById('gameClose').addEventListener('click', close);
+  game.addEventListener('click', function (e) { if (e.target === game) close(); });
+  game.querySelectorAll('.game-pad button').forEach(function (b) { b.addEventListener('click', function () { if (state === 'run') turn(b.dataset.dir); }); });
+  // 手機滑動
+  var sx, sy;
+  cvs.addEventListener('touchstart', function (e) { sx = e.touches[0].clientX; sy = e.touches[0].clientY; }, { passive: true });
+  cvs.addEventListener('touchend', function (e) {
+    var dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
+    if (Math.max(Math.abs(dx), Math.abs(dy)) < 20 || state !== 'run') return;
+    turn(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up'));
+  });
+})();
+</script>
+</body>
+</html>
